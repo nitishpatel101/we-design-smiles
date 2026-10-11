@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import LuxuryHeader from "@/components/LuxuryHeader";
 import CombinedScrubber from "@/components/CombinedScrubber";
+import AreaOverlay from "@/components/AreaOverlay";
 import FloatingCornerControls from "@/components/FloatingCornerControls";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
@@ -46,6 +47,9 @@ export default function HomePage() {
         videoSrc="/scrub_video.mp4"
         totalFrames={5000}
       />
+
+      {/* Small subtle transparent area callouts updating with scroll */}
+      <AreaOverlay />
 
       {/* Floating Corner Buttons matching Reference Image */}
       <FloatingCornerControls onOpenBooking={() => setIsBookingOpen(true)} />
