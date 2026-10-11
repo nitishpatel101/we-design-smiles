@@ -84,10 +84,10 @@ export default function CombinedScrubber({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[600vh] bg-slate-950"
+      className="relative w-full h-[600vh] bg-[#f4efe6]"
     >
       {/* Sticky fullscreen viewport */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-slate-950">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#f4efe6]">
         <video
           ref={videoRef}
           src={videoSrc}

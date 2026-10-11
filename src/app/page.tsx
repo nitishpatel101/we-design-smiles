@@ -36,7 +36,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white selection:bg-amber-400 selection:text-slate-950 font-sans relative">
+    <main className="min-h-screen bg-[#f4efe6] text-[#1c1917] selection:bg-[#dfbe76] selection:text-[#1c1917] font-sans relative">
       {/* Luxury Editorial Header matching Reference Image Style */}
       <LuxuryHeader
         onOpenBooking={() => setIsBookingOpen(true)}

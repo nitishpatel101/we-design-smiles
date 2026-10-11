@@ -58,8 +58,14 @@ export default function AreaOverlay() {
     };
   }
 
+  const isVideoActive = progress <= 0.86;
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-6 sm:p-12 select-none">
+    <div
+      className={`fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-6 sm:p-12 select-none transition-opacity duration-500 ${
+        isVideoActive ? "opacity-100" : "opacity-0"
+      }`}
+    >
       {/* Upper-Left: 100% PURE TRANSPARENT TEXT (No box, no border, no background) */}
       <div className="mt-28 max-w-lg transition-all duration-700 ease-out">
         <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest uppercase text-amber-300/90 mb-1 drop-shadow-md">
