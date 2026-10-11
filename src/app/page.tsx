@@ -20,14 +20,16 @@ export default function HomePage() {
       if (docHeight <= 0) return;
       const progress = Math.min(1, Math.max(0, scrollY / docHeight));
 
-      if (progress < 0.28) {
+      if (progress < 0.15) {
         setCurrentChapter("01 • THE ARRIVAL & RECEPTION");
-      } else if (progress < 0.55) {
+      } else if (progress < 0.30) {
         setCurrentChapter("02 • ERGONOMIC TREATMENT SUITE");
-      } else if (progress < 0.82) {
+      } else if (progress < 0.44) {
         setCurrentChapter("03 • SMILE TRANSFORMATIONS GALLERY");
-      } else {
+      } else if (progress < 0.55) {
         setCurrentChapter("04 • STERILE CLINICAL CONTINUITY");
+      } else {
+        setCurrentChapter("05 • MEET OUR 8 SPECIALIST DOCTORS");
       }
     };
 

@@ -28,21 +28,21 @@ export default function AreaOverlay() {
 
   let currentArea: AreaInfo;
 
-  if (progress < 0.28) {
+  if (progress < 0.15) {
     currentArea = {
       tag: "ZONE 01 • ARRIVAL",
       title: "Executive Reception & Patient Sanctuary",
       desc: "Tranquil arrival lounge designed for immediate comfort and anxiety-free hospitality.",
       pills: ["Private Concierge", "Noise-Canceling Architecture", "Warm Natural Light"],
     };
-  } else if (progress < 0.58) {
+  } else if (progress < 0.30) {
     currentArea = {
       tag: "ZONE 02 • CLINICAL OPERATORY",
       title: "Ergonomic Treatment Suite",
       desc: "Hospital-grade overhead lighting, whisper-quiet electric handpieces and computerized painless anesthesia.",
       pills: ["Ergonomic Memory-Foam Chair", "3D Digital Scanners", "100% Painless Protocol"],
     };
-  } else if (progress < 0.82) {
+  } else if (progress < 0.44) {
     currentArea = {
       tag: "ZONE 03 • RESULTS GALLERY",
       title: "Smile Transformations & Results Wall",
@@ -58,7 +58,7 @@ export default function AreaOverlay() {
     };
   }
 
-  const isVideoActive = progress <= 0.86;
+  const isVideoActive = progress <= 0.55;
 
   return (
     <div
