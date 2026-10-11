@@ -62,27 +62,27 @@ export default function AreaOverlay() {
 
   return (
     <div
-      className={`fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-6 sm:p-12 select-none transition-opacity duration-500 ${
+      className={`fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-4 sm:p-12 select-none transition-opacity duration-500 ${
         isVideoActive ? "opacity-100" : "opacity-0"
       }`}
     >
       {/* Upper-Left: 100% PURE TRANSPARENT TEXT (No box, no border, no background) */}
-      <div className="mt-28 max-w-lg transition-all duration-700 ease-out">
-        <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest uppercase text-amber-300/90 mb-1 drop-shadow-md">
+      <div className="mt-20 sm:mt-28 max-w-sm sm:max-w-lg transition-all duration-700 ease-out">
+        <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-mono tracking-widest uppercase text-amber-300/90 mb-1 drop-shadow-md">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
           <span>{currentArea.tag}</span>
         </div>
 
-        <h3 className="text-base sm:text-xl font-semibold tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+        <h3 className="text-sm sm:text-xl font-semibold tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
           {currentArea.title}
         </h3>
 
-        <p className="text-xs sm:text-sm text-slate-200/90 mt-1.5 leading-relaxed font-light drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]">
+        <p className="text-[11px] sm:text-sm text-slate-200/90 mt-1 leading-relaxed font-light drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]">
           {currentArea.desc}
         </p>
 
         {/* Small Transparent Pill Tags (No background, just pure transparent floating text with subtle dot) */}
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] font-mono tracking-wider text-slate-300/90">
+        <div className="mt-2 sm:mt-3 flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono tracking-wider text-slate-300/90">
           {currentArea.pills.map((pill, idx) => (
             <span key={idx} className="inline-flex items-center gap-1.5 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
               <span className="text-amber-400 opacity-75">•</span>

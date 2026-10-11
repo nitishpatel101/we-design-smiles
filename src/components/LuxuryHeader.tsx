@@ -14,20 +14,20 @@ export default function LuxuryHeader({
   const [isMuted, setIsMuted] = useState(true);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 px-6 sm:px-10 py-6 pointer-events-none bg-gradient-to-b from-black/80 via-black/30 to-transparent">
-      <div className="max-w-7xl mx-auto flex items-start justify-between gap-4 pointer-events-auto">
+    <header className="fixed top-0 inset-x-0 z-40 px-4 sm:px-10 py-3 sm:py-6 pointer-events-none bg-gradient-to-b from-black/80 via-black/30 to-transparent">
+      <div className="max-w-7xl mx-auto flex items-start justify-between gap-2 sm:gap-4 pointer-events-auto">
         {/* Left Side: Editorial Luxury Branding */}
-        <div className="space-y-1">
+        <div className="space-y-0.5 sm:space-y-1">
           {/* Chapter Pill Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-black/60 border border-white/20 text-slate-200 backdrop-blur-md mb-1.5 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono tracking-widest uppercase bg-black/60 border border-white/20 text-slate-200 backdrop-blur-md mb-1 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#dfbe76] animate-pulse" />
-            <span>{currentChapter}</span>
+            <span className="truncate max-w-[180px] sm:max-w-none">{currentChapter}</span>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-serif tracking-wider text-white uppercase drop-shadow font-normal">
+          <h1 className="text-base sm:text-2xl font-serif tracking-wider text-white uppercase drop-shadow font-normal">
             WE DESIGN SMILES
           </h1>
-          <p className="text-[10px] tracking-widest uppercase font-medium text-amber-200/90 font-mono">
+          <p className="text-[8px] sm:text-[10px] tracking-widest uppercase font-medium text-amber-200/90 font-mono">
             AESTHETIC & IMPLANT DENTAL CLINIC
           </p>
           <p className="text-[9px] tracking-widest uppercase text-slate-400 font-mono hidden sm:block">
@@ -36,11 +36,11 @@ export default function LuxuryHeader({
         </div>
 
         {/* Right Side: 3 Stacked Circular Glass Action Icons */}
-        <div className="flex items-center gap-2.5 pt-1">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 pt-0.5 sm:pt-1">
           {/* Sound Toggle Icon */}
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:text-[#dfbe76] hover:border-[#dfbe76]/50 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:text-[#dfbe76] hover:border-[#dfbe76]/50 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer"
             title={isMuted ? "Sound: Off" : "Sound: On"}
             aria-label="Sound Toggle"
           >

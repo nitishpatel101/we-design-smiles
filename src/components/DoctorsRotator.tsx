@@ -161,7 +161,24 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
 
   const numDoctors = DOCTORS.length;
   const angleStep = 360 / numDoctors; // 45 degrees per doctor for 8 doctors
-  const cylinderRadius = 380; // 380px radius for balanced 3D spacing
+  const [cylinderRadius, setCylinderRadius] = useState(380);
+
+  // Responsive cylinder radius for mobile, tablet, and desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setCylinderRadius(220); // Compact radius for mobile screens
+      } else if (window.innerWidth < 1024) {
+        setCylinderRadius(300); // Tablet radius
+      } else {
+        setCylinderRadius(380); // Desktop radius
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Silky Smooth RAF Lerp Loop for 3D Carousel Rotation
   useEffect(() => {
@@ -250,10 +267,10 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
         </div>
 
         {/* Center Stage: Calibrated 3D Cylindrical Carousel */}
-        <div className="relative h-[280px] sm:h-[300px] flex items-center justify-center perspective-[1400px] z-20 my-auto">
-          {/* Cylinder Pivot Container: translateZ(-R) keeps front card at Z=0 (no explosive zoom towards camera) */}
+        <div className="relative h-[240px] sm:h-[280px] md:h-[300px] flex items-center justify-center perspective-[1400px] z-20 my-auto">
+          {/* Cylinder Pivot Container: translateZ(-R) keeps front card at Z=0 */}
           <div
-            className="relative w-[210px] sm:w-[230px] h-[260px] sm:h-[280px] transition-transform ease-out"
+            className="relative w-[170px] sm:w-[210px] md:w-[230px] h-[220px] sm:h-[260px] md:h-[280px] transition-transform ease-out"
             style={{
               transformStyle: "preserve-3d",
               transform: `translateZ(-${cylinderRadius}px) rotateY(${-rotationAngle}deg)`,
