@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
+import { Play, Pause, RotateCcw, ChevronDown, Sliders } from "lucide-react";
 
 interface CombinedScrubberProps {
   totalFrames?: number;
@@ -9,14 +9,21 @@ interface CombinedScrubberProps {
 }
 
 export default function CombinedScrubber({
-  totalFrames = 900,
+  totalFrames = 2500,
   folderPath = "/videos/combined_frames",
 }: CombinedScrubberProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const imagesRef = useRef<Map<number, HTMLImageElement>>(new Map());
-  const [currentFrame, setCurrentFrame] = useState<number>(1);
+  const requestedRef = useRef<Set<number>>(new Set());
+
+  // Current target frame from scroll
+  const targetFrameRef = useRef<number>(1);
+  // Current rendered frame (with lerp easing)
+  const currentFrameRef = useRef<number>(1);
+
+  const [displayFrame, setDisplayFrame] = useState<number>(1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -28,6 +35,23 @@ export default function CombinedScrubber({
     [folderPath]
   );
 
+  // Helper to load a specific frame into map
+  const requestFrame = useCallback(
+    (index: number) => {
+      if (index < 1 || index > totalFrames) return;
+      if (requestedRef.current.has(index)) return;
+      requestedRef.current.add(index);
+
+      const img = new Image();
+      img.src = getFrameUrl(index);
+      img.onload = () => {
+        imagesRef.current.set(index, img);
+      };
+    },
+    [totalFrames, getFrameUrl]
+  );
+
+  // Draw nearest available loaded frame
   const renderFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -36,10 +60,11 @@ export default function CombinedScrubber({
 
     let img = imagesRef.current.get(frameIndex);
     if (!img || !img.complete || img.naturalWidth === 0) {
-      let closest = 1;
+      // Find nearest loaded frame within +/- 50 frames
+      let closest = -1;
       let minDiff = Infinity;
-      imagesRef.current.forEach((image, idx) => {
-        if (image.complete && image.naturalWidth > 0) {
+      imagesRef.current.forEach((cachedImg, idx) => {
+        if (cachedImg.complete && cachedImg.naturalWidth > 0) {
           const diff = Math.abs(idx - frameIndex);
           if (diff < minDiff) {
             minDiff = diff;
@@ -47,7 +72,9 @@ export default function CombinedScrubber({
           }
         }
       });
-      img = imagesRef.current.get(closest);
+      if (closest !== -1) {
+        img = imagesRef.current.get(closest);
+      }
     }
 
     if (!img || !img.complete || img.naturalWidth === 0) return;
@@ -81,64 +108,69 @@ export default function CombinedScrubber({
   const updateCanvasDimensions = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-    renderFrame(currentFrame);
-  }, [currentFrame, renderFrame]);
+    renderFrame(Math.round(currentFrameRef.current));
+  }, [renderFrame]);
 
-  // Preload initial batch, then background load rest in chunks
+  // PHASE 1 PRELOAD: Keyframe Skeleton (1 frame every 25 frames = 100 frames total across entire timeline)
+  // This guarantees ANY scroll position instantly has a crisp frame nearby (< 1 sec initial load)
   useEffect(() => {
-    let isCancelled = false;
-
-    // Load first 60 frames immediately
-    const initialBatch = Math.min(60, totalFrames);
-    for (let i = 1; i <= initialBatch; i++) {
-      const img = new Image();
-      img.src = getFrameUrl(i);
-      img.onload = () => {
-        if (isCancelled) return;
-        imagesRef.current.set(i, img);
-        if (i === 1) renderFrame(1);
-      };
+    // 1. Initial 15 frames immediately for instant first view
+    for (let i = 1; i <= 20; i++) {
+      requestFrame(i);
     }
 
-    // Load remaining frames in batches of 40 to ensure butter-smooth network & memory
-    let currentIndex = initialBatch + 1;
-    const interval = setInterval(() => {
-      if (isCancelled || currentIndex > totalFrames) {
-        clearInterval(interval);
-        return;
-      }
-      const batchEnd = Math.min(currentIndex + 40, totalFrames + 1);
-      for (let i = currentIndex; i < batchEnd; i++) {
-        const img = new Image();
-        img.src = getFrameUrl(i);
-        img.onload = () => {
-          if (!isCancelled) imagesRef.current.set(i, img);
-        };
-      }
-      currentIndex = batchEnd;
-    }, 150);
+    // 2. Sample keyframes every 25 frames
+    for (let i = 25; i <= totalFrames; i += 25) {
+      requestFrame(i);
+    }
+  }, [totalFrames, requestFrame]);
 
-    return () => {
-      isCancelled = true;
-      clearInterval(interval);
-    };
-  }, [totalFrames, getFrameUrl, renderFrame]);
-
+  // Window resize listener
   useEffect(() => {
     updateCanvasDimensions();
     window.addEventListener("resize", updateCanvasDimensions);
     return () => window.removeEventListener("resize", updateCanvasDimensions);
   }, [updateCanvasDimensions]);
 
-  // Scroll scrub listener
+  // High-performance RAF Render Loop with Lerp Smoothing
+  useEffect(() => {
+    let animId: number;
+
+    const tick = () => {
+      if (!isPlaying) {
+        const target = targetFrameRef.current;
+        const current = currentFrameRef.current;
+
+        // Smooth Lerp step towards target
+        const diff = target - current;
+        if (Math.abs(diff) > 0.1) {
+          const next = current + diff * 0.18; // smooth 18% interpolation factor
+          currentFrameRef.current = next;
+          const rounded = Math.round(next);
+          renderFrame(rounded);
+          setDisplayFrame(rounded);
+
+          // Proactively prioritize loading frames around current window
+          for (let offset = -10; offset <= 25; offset++) {
+            requestFrame(rounded + offset);
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(tick);
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, [isPlaying, renderFrame, requestFrame]);
+
+  // Scroll listener
   useEffect(() => {
     if (isPlaying) return;
-
-    let animationFrameId: number;
 
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -151,36 +183,38 @@ export default function CombinedScrubber({
 
       const scrolled = -rect.top;
       const progress = Math.min(1, Math.max(0, scrolled / totalScrollable));
-      const targetFrame = Math.min(
+      const target = Math.min(
         totalFrames,
         Math.max(1, Math.round(progress * (totalFrames - 1)) + 1)
       );
 
-      animationFrameId = requestAnimationFrame(() => {
-        setCurrentFrame(targetFrame);
-        renderFrame(targetFrame);
-      });
+      targetFrameRef.current = target;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [totalFrames, isPlaying, renderFrame]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [totalFrames, isPlaying]);
 
-  // Auto-play at 30 FPS
+  // Auto-play at 60 FPS
   useEffect(() => {
     if (isPlaying) {
       playIntervalRef.current = setInterval(() => {
-        setCurrentFrame((prev) => {
-          const next = prev >= totalFrames ? 1 : prev + 1;
-          renderFrame(next);
-          return next;
-        });
-      }, 1000 / 30);
+        const next =
+          currentFrameRef.current >= totalFrames
+            ? 1
+            : currentFrameRef.current + 1;
+        currentFrameRef.current = next;
+        targetFrameRef.current = next;
+        renderFrame(next);
+        setDisplayFrame(next);
+
+        // Preload next frames
+        for (let offset = 1; offset <= 20; offset++) {
+          requestFrame(next + offset);
+        }
+      }, 1000 / 60); // 60 FPS
     } else if (playIntervalRef.current) {
       clearInterval(playIntervalRef.current);
     }
@@ -188,18 +222,23 @@ export default function CombinedScrubber({
     return () => {
       if (playIntervalRef.current) clearInterval(playIntervalRef.current);
     };
-  }, [isPlaying, totalFrames, renderFrame]);
+  }, [isPlaying, totalFrames, renderFrame, requestFrame]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
-    setCurrentFrame(val);
+    targetFrameRef.current = val;
+    currentFrameRef.current = val;
     renderFrame(val);
+    setDisplayFrame(val);
+    for (let offset = -10; offset <= 25; offset++) {
+      requestFrame(val + offset);
+    }
   };
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[650vh] bg-slate-950"
+      className="relative w-full h-[1200vh] bg-slate-950"
     >
       {/* Sticky fullscreen viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-slate-950">
@@ -209,7 +248,7 @@ export default function CombinedScrubber({
         />
 
         {/* Minimal Subtle Floating Video Controls (Bottom Right) */}
-        <div className="absolute bottom-8 right-6 z-30 flex items-center gap-3 bg-slate-950/75 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl">
+        <div className="absolute bottom-8 right-6 z-30 flex items-center gap-3 bg-slate-950/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl text-white">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-cyan-400 transition-colors cursor-pointer"
@@ -227,8 +266,10 @@ export default function CombinedScrubber({
 
           <button
             onClick={() => {
-              setCurrentFrame(1);
+              targetFrameRef.current = 1;
+              currentFrameRef.current = 1;
               renderFrame(1);
+              setDisplayFrame(1);
             }}
             className="text-slate-400 hover:text-white transition-colors cursor-pointer"
             title="Reset to beginning"
@@ -241,21 +282,21 @@ export default function CombinedScrubber({
               type="range"
               min={1}
               max={totalFrames}
-              value={currentFrame}
+              value={displayFrame}
               onChange={handleSliderChange}
-              className="w-28 accent-cyan-400 cursor-pointer h-1 bg-slate-800 rounded-lg"
+              className="w-32 accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
             />
           </div>
 
           <span className="font-mono text-[10px] text-cyan-300/80 pl-1">
-            {currentFrame} / {totalFrames}
+            {displayFrame} / {totalFrames}
           </span>
         </div>
 
         {/* Minimal Scroll down cue at bottom center (fades out as scrolled) */}
-        {currentFrame < 45 && (
+        {displayFrame < 80 && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 text-slate-400/80 text-[11px] font-mono tracking-widest uppercase animate-bounce pointer-events-none">
-            <span>Scroll</span>
+            <span>Scroll Down to Scrub (2500 Frames)</span>
             <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />
           </div>
         )}
