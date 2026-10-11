@@ -213,7 +213,7 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Direct manual rotation when clicking arrows or cards
+  // Direct manual rotation when clicking arrows, dots, or cards
   const rotateTo = (index: number) => {
     setActiveIndex(index);
     targetAngleRef.current = index * angleStep;
@@ -227,16 +227,16 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
       className="relative w-full h-[380vh] bg-gradient-to-b from-[#b09e85] via-[#ede7dc] to-[#f4efe6]"
     >
       {/* Sticky Fullscreen Pinned Viewport */}
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between py-6 sm:py-8 px-4 sm:px-8 overflow-hidden select-none z-30">
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-between pt-6 pb-4 sm:pt-8 sm:pb-6 px-4 sm:px-8 overflow-hidden select-none z-30">
         {/* Warm Ambient clinic cove glow matching video palette */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#dfbe76]/20 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-white/70 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto pt-2 sm:pt-4 relative z-10 shrink-0">
+        {/* Section Header with balanced top distance */}
+        <div className="text-center max-w-2xl mx-auto pt-2 sm:pt-3 relative z-10 shrink-0">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-widest bg-[#dfbe76]/25 border border-[#b88f30]/40 text-[#8c6b22] mb-1.5 shadow-sm">
             <RotateCw className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: "12s" }} />
-            <span>Interactive 360° Specialist Showcase • 8 Master Clinicians</span>
+            <span>Interactive 360° Showcase • 8 Specialist Doctors</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-serif tracking-tight text-[#1c1916] uppercase font-normal">
@@ -244,14 +244,14 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
           </h2>
 
           <p className="mt-1 text-xs sm:text-sm text-[#574c3e] font-light hidden sm:block">
-            Scroll down to complete a full 360° rotation through our team. Each doctor brings international training and precision technology.
+            Scroll down to rotate through each specialist in 360° circular motion. Click any doctor to view full details.
           </p>
         </div>
 
-        {/* Center Stage: 3D Cylindrical Carousel */}
-        <div className="relative h-[340px] sm:h-[380px] flex items-center justify-center perspective-[1400px] z-10 my-auto">
+        {/* Center Stage: Spacious 3D Cylindrical Carousel */}
+        <div className="relative h-[330px] sm:h-[370px] flex items-center justify-center perspective-[1500px] z-10 my-auto">
           <div
-            className="relative w-[240px] sm:w-[280px] h-[320px] sm:h-[360px] transition-transform ease-out"
+            className="relative w-[230px] sm:w-[260px] h-[310px] sm:h-[350px] transition-transform ease-out"
             style={{
               transformStyle: "preserve-3d",
               transform: `rotateY(${-rotationAngle}deg)`,
@@ -265,13 +265,13 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
                 <div
                   key={doc.id}
                   onClick={() => rotateTo(idx)}
-                  className={`absolute inset-0 rounded-3xl overflow-hidden cursor-pointer border transition-all duration-500 bg-white shadow-2xl flex flex-col justify-end p-5 select-none ${
+                  className={`absolute inset-0 rounded-3xl overflow-hidden cursor-pointer border transition-all duration-500 bg-white shadow-2xl flex flex-col justify-end p-4 sm:p-5 select-none ${
                     isFront
-                      ? "border-[#b88f30] shadow-[0_25px_60px_-15px_rgba(184,143,48,0.4)] ring-4 ring-[#dfbe76]/50 scale-105 opacity-100 z-20"
-                      : "border-[#ded5c6] opacity-40 hover:opacity-75 shadow-md scale-95"
+                      ? "border-2 border-[#b88f30] shadow-[0_30px_70px_-15px_rgba(184,143,48,0.45)] ring-4 ring-[#dfbe76]/50 scale-105 opacity-100 z-30"
+                      : "border border-[#ded5c6] opacity-35 hover:opacity-70 shadow-lg scale-90"
                   }`}
                   style={{
-                    transform: `rotateY(${baseAngle}deg) translateZ(380px)`,
+                    transform: `rotateY(${baseAngle}deg) translateZ(460px)`,
                     backfaceVisibility: "hidden",
                   }}
                 >
@@ -281,29 +281,25 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
                     alt={doc.name}
                     fill
                     className="object-cover object-top filter brightness-[0.98] contrast-[1.02]"
-                    sizes="280px"
+                    sizes="260px"
                     priority={idx === 0}
                   />
 
-                  {/* Gradient Backdrop over image bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1916] via-[#1c1916]/75 to-transparent" />
+                  {/* Clean bottom gradient vignette */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1916] via-[#1c1916]/70 to-transparent" />
 
-                  {/* Card Content Overlay */}
+                  {/* Minimalist Card Overlay for clean, unobstructed portrait */}
                   <div className="relative z-10 space-y-1">
                     <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-wider bg-[#dfbe76]/35 text-[#ecd08e] border border-[#dfbe76]/45 font-bold">
                       {doc.role.split("&")[0]}
                     </span>
 
-                    <h3 className="text-lg font-bold text-white tracking-wide leading-tight">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide leading-tight">
                       {doc.name}
                     </h3>
 
                     <p className="text-[11px] text-[#dfbe76] font-mono leading-tight">
                       {doc.degree}
-                    </p>
-
-                    <p className="text-[10px] text-[#ddd4c4] line-clamp-2 font-light pt-0.5 leading-snug">
-                      {doc.description}
                     </p>
                   </div>
                 </div>
@@ -312,24 +308,24 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
           </div>
         </div>
 
-        {/* Bottom Panel: Active Doctor Full Profile & Controls */}
-        <div className="relative z-10 max-w-4xl w-full mx-auto pb-2 shrink-0">
+        {/* Bottom Panel: Spacious Active Doctor Full Profile & Distance Adjustments */}
+        <div className="relative z-10 max-w-4xl w-full mx-auto shrink-0 mt-3 sm:mt-5">
           <div className="rounded-2xl sm:rounded-3xl bg-white/95 border border-[#ded5c6] p-4 sm:p-6 shadow-xl shadow-[#87755b]/12 backdrop-blur-xl">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center">
-              {/* Profile Snapshot */}
-              <div className="md:col-span-5 space-y-2 border-b md:border-b-0 md:border-r border-[#ded5c6] pb-3 md:pb-0 md:pr-4">
+              {/* Profile Snapshot with generous spacing */}
+              <div className="md:col-span-5 space-y-2 border-b md:border-b-0 md:border-r border-[#ded5c6] pb-3 md:pb-0 md:pr-6">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-[#dfbe76]/20 text-[#8c6b22] border border-[#b88f30]/35">
-                    <Award className="w-3 h-3" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-[#dfbe76]/20 text-[#8c6b22] border border-[#b88f30]/35 font-bold">
+                    <Award className="w-3.5 h-3.5 text-[#b88f30]" />
                     <span>{activeDoc.experience}</span>
                   </div>
 
-                  <span className="text-[11px] font-mono font-bold text-[#8c6b22]">
-                    Doctor {activeIndex + 1} of {numDoctors}
+                  <span className="text-[11px] font-mono font-bold text-[#8c6b22] bg-[#f4efe6] px-2 py-0.5 rounded-md border border-[#ded5c6]">
+                    0{activeIndex + 1} / 0{numDoctors}
                   </span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-[#1c1916]">
+                <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#1c1916] tracking-tight">
                   {activeDoc.name}
                 </h3>
 
@@ -337,15 +333,19 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
                   {activeDoc.role}
                 </p>
 
-                <p className="text-[11px] text-[#6e6150]">
+                <p className="text-[11px] text-[#706352] font-mono">
                   {activeDoc.degree}
+                </p>
+
+                <p className="text-[11px] sm:text-xs text-[#574c3e] leading-relaxed pt-1 line-clamp-2">
+                  {activeDoc.description}
                 </p>
               </div>
 
-              {/* Procedures & Action */}
+              {/* Procedures & Action with distinct breathing room */}
               <div className="md:col-span-7 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {activeDoc.procedures.slice(0, 4).map((proc, i) => (
+                  {activeDoc.procedures.map((proc, i) => (
                     <div
                       key={i}
                       className="p-2 sm:p-2.5 rounded-xl bg-[#f7f3eb] border border-[#e3dacd] text-[11px] text-[#1c1916] flex items-center gap-2 hover:border-[#b88f30] hover:bg-white transition-all shadow-sm"
@@ -356,7 +356,7 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1.5">
                   <button
                     onClick={onOpenBooking}
                     className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider text-white bg-gradient-to-r from-[#b88f30] via-[#cfa94c] to-[#b88f30] hover:brightness-105 transition-all shadow-md shadow-[#b88f30]/25 hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
@@ -365,18 +365,18 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
                     <span>Book Consultation with {activeDoc.name.split(" ")[1]}</span>
                   </button>
 
-                  {/* Manual Arrow & Dots Controls */}
+                  {/* Manual Arrow & Dots Controls with clean gap */}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => rotateTo((activeIndex - 1 + numDoctors) % numDoctors)}
-                      className="w-8 h-8 rounded-full bg-white border border-[#ded5c6] hover:border-[#b88f30] text-[#1c1916] hover:text-[#b88f30] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                      className="w-8 h-8 rounded-full bg-white border border-[#ded5c6] hover:border-[#b88f30] text-[#1c1916] hover:text-[#b88f30] flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-110 active:scale-95"
                       title="Previous Doctor"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
 
                     {/* Dots Indicator */}
-                    <div className="flex items-center gap-1.5 px-2">
+                    <div className="flex items-center gap-1.5 px-1.5">
                       {DOCTORS.map((d, i) => (
                         <button
                           key={d.id}
@@ -393,7 +393,7 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
 
                     <button
                       onClick={() => rotateTo((activeIndex + 1) % numDoctors)}
-                      className="w-8 h-8 rounded-full bg-white border border-[#ded5c6] hover:border-[#b88f30] text-[#1c1916] hover:text-[#b88f30] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                      className="w-8 h-8 rounded-full bg-white border border-[#ded5c6] hover:border-[#b88f30] text-[#1c1916] hover:text-[#b88f30] flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-110 active:scale-95"
                       title="Next Doctor"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -405,9 +405,9 @@ export default function DoctorsRotator({ onOpenBooking }: DoctorsRotatorProps) {
           </div>
 
           {/* Scroll Rotation Progress Bar */}
-          <div className="mt-2 flex items-center justify-center gap-3 text-[10px] font-mono text-[#786b59]">
+          <div className="mt-2.5 flex items-center justify-center gap-3 text-[10px] font-mono text-[#786b59]">
             <span>360° ROUND ROTATION</span>
-            <div className="w-36 h-1.5 bg-[#dfd6c7] rounded-full overflow-hidden">
+            <div className="w-40 h-1.5 bg-[#dfd6c7] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#b88f30] transition-all duration-150"
                 style={{ width: `${Math.round(scrollProgress * 100)}%` }}
