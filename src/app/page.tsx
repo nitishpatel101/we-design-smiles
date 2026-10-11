@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import LuxuryHeader from "@/components/LuxuryHeader";
 import CombinedScrubber from "@/components/CombinedScrubber";
 import AreaOverlay from "@/components/AreaOverlay";
+import DoctorsRotator from "@/components/DoctorsRotator";
 import FloatingCornerControls from "@/components/FloatingCornerControls";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
@@ -50,6 +51,9 @@ export default function HomePage() {
 
       {/* Small subtle transparent area callouts updating with scroll */}
       <AreaOverlay />
+
+      {/* 3D Circular Rotating Doctors Showcase */}
+      <DoctorsRotator onOpenBooking={() => setIsBookingOpen(true)} />
 
       {/* Floating Corner Buttons matching Reference Image */}
       <FloatingCornerControls onOpenBooking={() => setIsBookingOpen(true)} />
