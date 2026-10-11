@@ -14,10 +14,10 @@ export default function HomePage() {
       {/* Top Header: Left = Brand Logo, Right = Book Consultant button */}
       <MinimalHeader onOpenBooking={() => setIsBookingOpen(true)} />
 
-      {/* Fullscreen Clean Video Scrubber (Combined 3-in-1 video, 361 frames) */}
+      {/* Fullscreen Clean Video Scrubber (Combined 3-in-1 video, 900 frames 1080p) */}
       <CombinedScrubber
         folderPath="/videos/combined_frames"
-        totalFrames={361}
+        totalFrames={900}
       />
 
       {/* Complete Footer at the very bottom with Contact No, WhatsApp, Address, Timings, etc. */}

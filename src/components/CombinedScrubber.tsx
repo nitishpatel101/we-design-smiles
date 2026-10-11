@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, RotateCcw, ChevronDown, Sliders } from "lucide-react";
+import { Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
 
 interface CombinedScrubberProps {
-  totalFrames: number;
-  folderPath: string;
+  totalFrames?: number;
+  folderPath?: string;
 }
 
 export default function CombinedScrubber({
-  totalFrames = 361,
+  totalFrames = 900,
   folderPath = "/videos/combined_frames",
 }: CombinedScrubberProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -88,12 +88,12 @@ export default function CombinedScrubber({
     renderFrame(currentFrame);
   }, [currentFrame, renderFrame]);
 
-  // Incremental preloading
+  // Preload initial batch, then background load rest in chunks
   useEffect(() => {
     let isCancelled = false;
 
-    // Load initial 40 frames immediately
-    const initialBatch = Math.min(40, totalFrames);
+    // Load first 60 frames immediately
+    const initialBatch = Math.min(60, totalFrames);
     for (let i = 1; i <= initialBatch; i++) {
       const img = new Image();
       img.src = getFrameUrl(i);
@@ -104,22 +104,27 @@ export default function CombinedScrubber({
       };
     }
 
-    // Load remaining frames in background
-    const timeout = setTimeout(() => {
-      for (let i = initialBatch + 1; i <= totalFrames; i++) {
-        if (isCancelled) break;
+    // Load remaining frames in batches of 40 to ensure butter-smooth network & memory
+    let currentIndex = initialBatch + 1;
+    const interval = setInterval(() => {
+      if (isCancelled || currentIndex > totalFrames) {
+        clearInterval(interval);
+        return;
+      }
+      const batchEnd = Math.min(currentIndex + 40, totalFrames + 1);
+      for (let i = currentIndex; i < batchEnd; i++) {
         const img = new Image();
         img.src = getFrameUrl(i);
         img.onload = () => {
-          if (isCancelled) return;
-          imagesRef.current.set(i, img);
+          if (!isCancelled) imagesRef.current.set(i, img);
         };
       }
-    }, 200);
+      currentIndex = batchEnd;
+    }, 150);
 
     return () => {
       isCancelled = true;
-      clearTimeout(timeout);
+      clearInterval(interval);
     };
   }, [totalFrames, getFrameUrl, renderFrame]);
 
@@ -166,7 +171,7 @@ export default function CombinedScrubber({
     };
   }, [totalFrames, isPlaying, renderFrame]);
 
-  // Auto-play preview
+  // Auto-play at 30 FPS
   useEffect(() => {
     if (isPlaying) {
       playIntervalRef.current = setInterval(() => {
@@ -175,7 +180,7 @@ export default function CombinedScrubber({
           renderFrame(next);
           return next;
         });
-      }, 1000 / 24);
+      }, 1000 / 30);
     } else if (playIntervalRef.current) {
       clearInterval(playIntervalRef.current);
     }
@@ -194,7 +199,7 @@ export default function CombinedScrubber({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[400vh] bg-slate-950"
+      className="relative w-full h-[650vh] bg-slate-950"
     >
       {/* Sticky fullscreen viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-slate-950">
@@ -204,7 +209,7 @@ export default function CombinedScrubber({
         />
 
         {/* Minimal Subtle Floating Video Controls (Bottom Right) */}
-        <div className="absolute bottom-8 right-6 z-30 flex items-center gap-3 bg-slate-950/70 backdrop-blur-md border border-white/10 px-3.5 py-2 rounded-full shadow-2xl">
+        <div className="absolute bottom-8 right-6 z-30 flex items-center gap-3 bg-slate-950/75 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-cyan-400 transition-colors cursor-pointer"
@@ -238,17 +243,17 @@ export default function CombinedScrubber({
               max={totalFrames}
               value={currentFrame}
               onChange={handleSliderChange}
-              className="w-24 accent-cyan-400 cursor-pointer h-1 bg-slate-800 rounded-lg"
+              className="w-28 accent-cyan-400 cursor-pointer h-1 bg-slate-800 rounded-lg"
             />
           </div>
 
           <span className="font-mono text-[10px] text-cyan-300/80 pl-1">
-            {currentFrame}/{totalFrames}
+            {currentFrame} / {totalFrames}
           </span>
         </div>
 
         {/* Minimal Scroll down cue at bottom center (fades out as scrolled) */}
-        {currentFrame < 30 && (
+        {currentFrame < 45 && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 text-slate-400/80 text-[11px] font-mono tracking-widest uppercase animate-bounce pointer-events-none">
             <span>Scroll</span>
             <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />
