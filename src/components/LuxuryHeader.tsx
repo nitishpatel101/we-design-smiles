@@ -24,9 +24,9 @@ export default function LuxuryHeader({
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 px-6 sm:px-10 py-5 ${
+      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 px-6 sm:px-10 py-6 ${
         isScrolled
-          ? "bg-slate-950/85 backdrop-blur-md border-b border-white/10 shadow-xl"
+          ? "bg-slate-950/80 backdrop-blur-md"
           : "bg-gradient-to-b from-slate-950/80 via-slate-950/30 to-transparent"
       }`}
     >
