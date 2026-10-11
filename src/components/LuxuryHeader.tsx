@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, Calendar } from "lucide-react";
+import { Volume2, VolumeX, Phone } from "lucide-react";
 
 interface LuxuryHeaderProps {
-  onOpenBooking: () => void;
   currentChapter?: string;
+  onOpenBooking?: () => void;
 }
 
 export default function LuxuryHeader({
-  onOpenBooking,
   currentChapter = "01 • THE ARRIVAL & RECEPTION",
 }: LuxuryHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,16 +50,53 @@ export default function LuxuryHeader({
           </p>
         </div>
 
-        {/* Right Side: Golden Capsule Button (Exactly matching reference image) */}
-        <div className="pt-1">
+        {/* Right Side: 3 Stacked Circular Glass Action Icons moved to Top-Right */}
+        <div className="flex items-center gap-2.5 pt-1">
+          {/* Sound Toggle Icon */}
           <button
-            onClick={onOpenBooking}
-            className="group relative inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest text-[#1a1407] bg-gradient-to-r from-[#dfbe76] via-[#ebd08e] to-[#dfbe76] hover:from-[#ebd08e] hover:to-[#f5dfa6] shadow-[0_4px_25px_rgba(223,190,118,0.35)] border border-[#fcedc2] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            onClick={() => setIsMuted(!isMuted)}
+            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:text-[#dfbe76] hover:border-[#dfbe76]/50 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer"
+            title={isMuted ? "Sound: Off" : "Sound: On"}
+            aria-label="Sound Toggle"
           >
-            {/* Delicate Sparkle / Flower icon */}
-            <Sparkles className="w-3.5 h-3.5 text-[#1a1407] group-hover:rotate-12 transition-transform" />
-            <span className="font-sans font-extrabold tracking-wider">BOOK CONSULTATION</span>
+            {isMuted ? (
+              <VolumeX className="w-4 h-4 text-slate-300" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-[#dfbe76]" />
+            )}
           </button>
+
+          {/* Instagram Social Icon */}
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:text-[#dfbe76] hover:border-[#dfbe76]/50 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95"
+            title="Follow on Instagram"
+            aria-label="Instagram Link"
+          >
+            <svg
+              className="w-4 h-4 fill-none stroke-current"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+            </svg>
+          </a>
+
+          {/* Direct Phone Call Icon */}
+          <a
+            href="tel:+919876543210"
+            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:text-[#dfbe76] hover:border-[#dfbe76]/50 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95"
+            title="Direct Phone Call (+91 98765 43210)"
+            aria-label="Phone Call Link"
+          >
+            <Phone className="w-4 h-4 text-slate-300" />
+          </a>
         </div>
       </div>
     </header>
