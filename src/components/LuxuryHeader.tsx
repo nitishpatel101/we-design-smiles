@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Volume2, VolumeX, Phone } from "lucide-react";
 
 interface LuxuryHeaderProps {
@@ -11,26 +11,11 @@ interface LuxuryHeaderProps {
 export default function LuxuryHeader({
   currentChapter = "01 • THE ARRIVAL & RECEPTION",
 }: LuxuryHeaderProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 px-6 sm:px-10 py-6 ${
-        isScrolled
-          ? "bg-slate-950/80 backdrop-blur-md"
-          : "bg-gradient-to-b from-slate-950/80 via-slate-950/30 to-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-start justify-between gap-4">
+    <header className="fixed top-0 inset-x-0 z-40 px-6 sm:px-10 py-6 pointer-events-none bg-gradient-to-b from-black/80 via-black/30 to-transparent">
+      <div className="max-w-7xl mx-auto flex items-start justify-between gap-4 pointer-events-auto">
         {/* Left Side: Editorial Luxury Branding */}
         <div className="space-y-1">
           {/* Chapter Pill Badge */}
@@ -50,7 +35,7 @@ export default function LuxuryHeader({
           </p>
         </div>
 
-        {/* Right Side: 3 Stacked Circular Glass Action Icons moved to Top-Right */}
+        {/* Right Side: 3 Stacked Circular Glass Action Icons */}
         <div className="flex items-center gap-2.5 pt-1">
           {/* Sound Toggle Icon */}
           <button
