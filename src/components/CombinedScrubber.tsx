@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, RotateCcw, ChevronDown, Sliders } from "lucide-react";
+import React, { useEffect, useRef, useCallback } from "react";
 
 interface CombinedScrubberProps {
   totalFrames?: number;
@@ -22,10 +21,6 @@ export default function CombinedScrubber({
   const targetFrameRef = useRef<number>(1);
   // Current rendered frame (with lerp easing)
   const currentFrameRef = useRef<number>(1);
-
-  const [displayFrame, setDisplayFrame] = useState<number>(1);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const getFrameUrl = useCallback(
     (index: number) => {
@@ -60,7 +55,7 @@ export default function CombinedScrubber({
 
     let img = imagesRef.current.get(frameIndex);
     if (!img || !img.complete || img.naturalWidth === 0) {
-      // Find nearest loaded frame within +/- 50 frames
+      // Find nearest loaded frame within available cached images
       let closest = -1;
       let minDiff = Infinity;
       imagesRef.current.forEach((cachedImg, idx) => {
@@ -115,15 +110,14 @@ export default function CombinedScrubber({
     renderFrame(Math.round(currentFrameRef.current));
   }, [renderFrame]);
 
-  // PHASE 1 PRELOAD: Keyframe Skeleton (1 frame every 25 frames = 100 frames total across entire timeline)
-  // This guarantees ANY scroll position instantly has a crisp frame nearby (< 1 sec initial load)
+  // PHASE 1 PRELOAD: Keyframe Skeleton
   useEffect(() => {
-    // 1. Initial 15 frames immediately for instant first view
+    // Initial 20 frames immediately for instant first view
     for (let i = 1; i <= 20; i++) {
       requestFrame(i);
     }
 
-    // 2. Sample keyframes every 25 frames
+    // Keyframes sampled every 25 frames across the whole video
     for (let i = 25; i <= totalFrames; i += 25) {
       requestFrame(i);
     }
@@ -141,23 +135,19 @@ export default function CombinedScrubber({
     let animId: number;
 
     const tick = () => {
-      if (!isPlaying) {
-        const target = targetFrameRef.current;
-        const current = currentFrameRef.current;
+      const target = targetFrameRef.current;
+      const current = currentFrameRef.current;
 
-        // Smooth Lerp step towards target
-        const diff = target - current;
-        if (Math.abs(diff) > 0.1) {
-          const next = current + diff * 0.18; // smooth 18% interpolation factor
-          currentFrameRef.current = next;
-          const rounded = Math.round(next);
-          renderFrame(rounded);
-          setDisplayFrame(rounded);
+      const diff = target - current;
+      if (Math.abs(diff) > 0.1) {
+        const next = current + diff * 0.18;
+        currentFrameRef.current = next;
+        const rounded = Math.round(next);
+        renderFrame(rounded);
 
-          // Proactively prioritize loading frames around current window
-          for (let offset = -10; offset <= 25; offset++) {
-            requestFrame(rounded + offset);
-          }
+        // Proactively prioritize loading frames around current scroll position
+        for (let offset = -10; offset <= 25; offset++) {
+          requestFrame(rounded + offset);
         }
       }
 
@@ -166,12 +156,10 @@ export default function CombinedScrubber({
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying, renderFrame, requestFrame]);
+  }, [renderFrame, requestFrame]);
 
   // Scroll listener
   useEffect(() => {
-    if (isPlaying) return;
-
     const handleScroll = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -195,45 +183,7 @@ export default function CombinedScrubber({
     handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [totalFrames, isPlaying]);
-
-  // Auto-play at 60 FPS
-  useEffect(() => {
-    if (isPlaying) {
-      playIntervalRef.current = setInterval(() => {
-        const next =
-          currentFrameRef.current >= totalFrames
-            ? 1
-            : currentFrameRef.current + 1;
-        currentFrameRef.current = next;
-        targetFrameRef.current = next;
-        renderFrame(next);
-        setDisplayFrame(next);
-
-        // Preload next frames
-        for (let offset = 1; offset <= 20; offset++) {
-          requestFrame(next + offset);
-        }
-      }, 1000 / 60); // 60 FPS
-    } else if (playIntervalRef.current) {
-      clearInterval(playIntervalRef.current);
-    }
-
-    return () => {
-      if (playIntervalRef.current) clearInterval(playIntervalRef.current);
-    };
-  }, [isPlaying, totalFrames, renderFrame, requestFrame]);
-
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    targetFrameRef.current = val;
-    currentFrameRef.current = val;
-    renderFrame(val);
-    setDisplayFrame(val);
-    for (let offset = -10; offset <= 25; offset++) {
-      requestFrame(val + offset);
-    }
-  };
+  }, [totalFrames]);
 
   return (
     <div
@@ -246,60 +196,6 @@ export default function CombinedScrubber({
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover block cursor-grab active:cursor-grabbing"
         />
-
-        {/* Minimal Subtle Floating Video Controls (Bottom Right) */}
-        <div className="absolute bottom-8 right-6 z-30 flex items-center gap-3 bg-slate-950/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl text-white">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-cyan-400 transition-colors cursor-pointer"
-            title={isPlaying ? "Pause auto-playback" : "Play auto-playback"}
-          >
-            {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 text-cyan-400" />
-            ) : (
-              <Play className="w-3.5 h-3.5 text-cyan-400" />
-            )}
-            <span className="font-mono text-[11px]">
-              {isPlaying ? "Pause" : "Play"}
-            </span>
-          </button>
-
-          <button
-            onClick={() => {
-              targetFrameRef.current = 1;
-              currentFrameRef.current = 1;
-              renderFrame(1);
-              setDisplayFrame(1);
-            }}
-            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title="Reset to beginning"
-          >
-            <RotateCcw className="w-3 h-3" />
-          </button>
-
-          <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-white/10">
-            <input
-              type="range"
-              min={1}
-              max={totalFrames}
-              value={displayFrame}
-              onChange={handleSliderChange}
-              className="w-32 accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-            />
-          </div>
-
-          <span className="font-mono text-[10px] text-cyan-300/80 pl-1">
-            {displayFrame} / {totalFrames}
-          </span>
-        </div>
-
-        {/* Minimal Scroll down cue at bottom center (fades out as scrolled) */}
-        {displayFrame < 80 && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 text-slate-400/80 text-[11px] font-mono tracking-widest uppercase animate-bounce pointer-events-none">
-            <span>Scroll Down to Scrub (2500 Frames)</span>
-            <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />
-          </div>
-        )}
       </div>
     </div>
   );
